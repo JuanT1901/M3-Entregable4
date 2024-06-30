@@ -1,7 +1,7 @@
 const catchError = require("../utils/catchError");
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken")
+const jwt = require("jsonwebtoken");
 
 const getAll = catchError(async (req, res) => {
   const results = await User.findAll();
@@ -53,20 +53,28 @@ const login = catchError(async (req, res) => {
   if (!user) return res.status(401).json({ error: "Invalid credentials" });
 
   const isValid = await bcrypt.compare(password, user.password);
-  if(!isValid) return res.status(401).json({ error: "Invalid credentials" });
+  if (!isValid) return res.status(401).json({ error: "Invalid credentials" });
 
-  const token = jwt.sign(
-    {user},
-    process.env.TOKEN_SECRET,
-    {expiresIn: "1d"}
-  )
+  const token = jwt.sign({ user }, process.env.TOKEN_SECRET, {
+    expiresIn: "1d",
+  });
 
-  return res.json(user, token);
+  return res.json({user, token});
 });
 
-const logged = catchError(async(req, res) => {
+const logged = catchError(async (req, res) => {
   const user = req.user;
   return res.json(user);
+});
+
+const setPosts = catchError(async(req, res) => {
+  const { id } = req.params;
+  const user = await User.findByPk(id);
+
+  await user.setPosts(req.body);
+
+  const posts = await user.getPosts();
+  return res.json(posts)
 })
 
 module.exports = {
@@ -77,4 +85,5 @@ module.exports = {
   update,
   login,
   logged,
+  setPosts
 };

@@ -6,6 +6,7 @@ const {
   update,
   login,
   logged,
+  setPosts,
 } = require("../controllers/user.controllers");
 const express = require("express");
 const { verifyJwt } = require("../utils/verifyJWT");
@@ -17,6 +18,8 @@ routerUser.route("/").get(verifyJwt, getAll).post(create);
 routerUser.route("/login").post(login);
 
 routerUser.route("/me").get(verifyJwt, logged);
+
+routerUser.route("/:id/posts").post(setPosts);
 
 routerUser.route("/:id")
   .get(verifyJwt, getOne)
